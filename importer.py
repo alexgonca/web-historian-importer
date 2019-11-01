@@ -30,7 +30,6 @@ from
 where
     id > {max_id}
 order by id
-limit 100000
 """
 
 SELECT_MAX_DATAPOINT_ID = """
@@ -48,7 +47,7 @@ values
 """
 
 
-def main():
+def import_data(cap_the_results=True):
     config = configparser.ConfigParser()
     config.read('config.ini')
 
@@ -78,11 +77,16 @@ def main():
     cursor_primary_database.execute(SELECT_MAX_DATAPOINT_ID)
     max_datapoint = cursor_primary_database.fetchone()
 
+    if cap_the_results:
+        select_datapoints = SELECT_DATAPOINTS + " limit 100000"
+    else:
+        select_datapoints = SELECT_DATAPOINTS
+
     new_web_historian_records = web_historian_database.cursor(cursor_factory=extras.DictCursor)
     if max_datapoint['max_id'] is None:
-        new_web_historian_records.execute(SELECT_DATAPOINTS.format(max_id=0))
+        new_web_historian_records.execute(select_datapoints.format(max_id=0))
     else:
-        new_web_historian_records.execute(SELECT_DATAPOINTS.format(max_id=max_datapoint['max_id']))
+        new_web_historian_records.execute(select_datapoints.format(max_id=max_datapoint['max_id']))
     for new_record in new_web_historian_records.fetchall():
         cursor_primary_database.execute(INSERT_DATAPOINT, (new_record['id'],
                                                            new_record['source'],
@@ -98,4 +102,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    import_data(cap_the_results=True)
