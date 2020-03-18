@@ -50,5 +50,5 @@ psql -d wh_mirror
 
 -- create new users:
 CREATE ROLE andreu with PASSWORD 'your_password';
-
+GRANT temporary_users TO demo_role;
 ALTER ROLE andreu INHERIT;
