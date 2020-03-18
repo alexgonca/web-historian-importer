@@ -32,11 +32,8 @@ create schema analysis
 -- show search_path for schemas:
 show search_path;
 
--- establish the right search_path:
-ALTER ROLE alex in database wh_mirror SET search_path TO public,analysis;
-
 -- to create a new user with the right permissions
-CREATE ROLE alex WITH PASSWORD 'your_password';
+CREATE USER alex WITH PASSWORD 'your_password';
 GRANT CONNECT ON DATABASE wh_mirror TO alex;
 GRANT USAGE ON SCHEMA public TO alex;
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO alex;
@@ -44,11 +41,23 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO alex;
 GRANT USAGE, CREATE ON SCHEMA analysis TO alex;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA analysis TO alex;
 ALTER DEFAULT PRIVILEGES IN SCHEMA analysis GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO alex;
+ALTER ROLE alex in database wh_mirror SET search_path TO public,analysis;
 
 -- to connect as a normal user:
 psql -d wh_mirror
 
 -- create new users:
-CREATE ROLE andreu with PASSWORD 'your_password';
-GRANT temporary_users TO demo_role;
+CREATE USER andreu with PASSWORD 'password';
+GRANT alex TO andreu;
 ALTER ROLE andreu INHERIT;
+ALTER ROLE andreu in database wh_mirror SET search_path TO public,analysis;
+--
+CREATE USER ericka with PASSWORD 'password';
+GRANT alex TO ericka;
+ALTER ROLE ericka INHERIT;
+ALTER ROLE ericka in database wh_mirror SET search_path TO public,analysis;
+--
+CREATE USER miriam with PASSWORD 'password';
+GRANT alex TO miriam;
+ALTER ROLE miriam INHERIT;
+ALTER ROLE miriam in database wh_mirror SET search_path TO public,analysis;
